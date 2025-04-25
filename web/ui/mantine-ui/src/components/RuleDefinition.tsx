@@ -21,7 +21,7 @@ import {
   lightTheme,
   promqlHighlighter,
 } from "../codemirror/theme";
-import { PromQLExtension } from "@prometheus-io/codemirror-promql";
+import { PromQLExtension } from "@dash0hq/codemirror-promql";
 import { LabelBadges } from "./LabelBadges";
 import { useSettings } from "../state/settingsSlice";
 import { actionIconStyle, badgeIconStyle } from "../styles";

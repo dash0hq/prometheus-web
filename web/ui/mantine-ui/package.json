@@ -28,7 +28,7 @@
     "@microsoft/fetch-event-source": "^2.0.1",
     "@nexucis/fuzzy": "^0.5.1",
     "@nexucis/kvsearch": "^0.9.1",
-    "@prometheus-io/codemirror-promql": "0.302.1",
+    "@dash0hq/codemirror-promql": "0.302.1",
     "@reduxjs/toolkit": "^2.6.1",
     "@tabler/icons-react": "^3.31.0",
     "@tanstack/react-query": "^5.67.1",
