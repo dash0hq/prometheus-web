@@ -26,7 +26,7 @@ import {
   numberTerms,
   snippets,
 } from './promql.terms';
-import { EqlSingle, Neq } from '@prometheus-io/lezer-promql';
+import { EqlSingle, LabelName, Neq } from '@prometheus-io/lezer-promql';
 import { syntaxTree } from '@codemirror/language';
 import { newCompleteStrategy } from './index';
 import { getMetricNameInVectorSelector } from './hybrid';
@@ -1388,43 +1388,43 @@ describe('getMetricNameInVectorSelector and findMetricNameInLabelMatchers tests'
       title: 'should get metric name from identifier',
       expr: 'http_requests_total{code="200"}',
       pos: 12, // position inside the label matcher section
-      expectedMetricName: 'http_requests_total',
+      expectedMetricName: { metricName: 'http_requests_total', definingMatchers: null },
     },
     {
       title: 'should get metric name from __name__ label matcher',
       expr: '{__name__="http_requests_total", code="200"}',
       pos: 20, // position inside the label matcher section
-      expectedMetricName: 'http_requests_total',
+      expectedMetricName: { metricName: 'http_requests_total', definingMatchers: null },
     },
     {
       title: 'should get metric name from otel_metric_name label matcher',
       expr: '{otel_metric_name="http.server.request.duration", instance="localhost:9090"}',
       pos: 30, // position inside the label matcher section
-      expectedMetricName: 'http.server.request.duration',
+      expectedMetricName: { metricName: '', definingMatchers: { type: 146, name: 'otel_metric_name', value: 'http.server.request.duration' } },
     },
     {
       title: 'should return empty string when no metric name can be found',
       expr: '{instance="localhost:9090", code="200"}',
       pos: 12, // position inside the label matcher section
-      expectedMetricName: '',
+      expectedMetricName: { metricName: '', definingMatchers: null },
     },
     {
       title: 'should ignore regex match expressions when finding metric name',
       expr: '{__name__=~"http_.*", instance="localhost:9090"}',
       pos: 12, // position inside the label matcher section
-      expectedMetricName: '',
+      expectedMetricName: { metricName: '', definingMatchers: null },
     },
     {
       title: 'should ignore inequality expressions when finding metric name',
       expr: '{__name__!="not_this_metric", instance="localhost:9090"}',
       pos: 12, // position inside the label matcher section
-      expectedMetricName: '',
+      expectedMetricName: { metricName: '', definingMatchers: null },
     },
     {
       title: 'should prioritize identifier over label matcher',
       expr: 'metric_from_identifier{__name__="metric_from_label"}',
       pos: 30, // position inside the label matcher section
-      expectedMetricName: 'metric_from_identifier',
+      expectedMetricName: { metricName: 'metric_from_identifier', definingMatchers: null },
     },
   ];
 
@@ -1444,7 +1444,7 @@ describe('findMetricNameInLabelMatchers function', () => {
   it('should return empty string when labelMatchers is null', () => {
     const state = createEditorState('metric');
     const result = findMetricNameInLabelMatchers(null, state);
-    expect(result).toEqual('');
+    expect(result).toEqual({ metricName: '', definingMatchers: null });
   });
 
   it('should return empty string when no metric name labels are found', () => {
@@ -1452,7 +1452,7 @@ describe('findMetricNameInLabelMatchers function', () => {
     const tree = syntaxTree(state);
     const labelMatchers = tree.resolve(1, -1).node;
     const result = findMetricNameInLabelMatchers(labelMatchers, state);
-    expect(result).toEqual('');
+    expect(result).toEqual({ metricName: '', definingMatchers: null });
   });
 
   it('should extract metric name from __name__ label', () => {
@@ -1460,15 +1460,15 @@ describe('findMetricNameInLabelMatchers function', () => {
     const tree = syntaxTree(state);
     const labelMatchers = tree.resolve(1, -1).node;
     const result = findMetricNameInLabelMatchers(labelMatchers, state);
-    expect(result).toEqual('node_cpu_seconds_total');
+    expect(result).toEqual({ metricName: 'node_cpu_seconds_total', definingMatchers: null });
   });
 
   it('should extract metric name from otel_metric_name label', () => {
-    const state = createEditorState('{otel_metric_name="process.runtime.go.gc.count"}');
+    const state = createEditorState('{otel_metric_name="dash0.test"}');
     const tree = syntaxTree(state);
     const labelMatchers = tree.resolve(1, -1).node;
     const result = findMetricNameInLabelMatchers(labelMatchers, state);
-    expect(result).toEqual('process.runtime.go.gc.count');
+    expect(result).toEqual({ metricName: '', definingMatchers: { type: 146, name: 'otel_metric_name', value: 'dash0.test' } });
   });
 
   it('should only consider exact match operators (=)', () => {
@@ -1476,7 +1476,7 @@ describe('findMetricNameInLabelMatchers function', () => {
     const tree = syntaxTree(state);
     const labelMatchers = tree.resolve(1, -1).node;
     const result = findMetricNameInLabelMatchers(labelMatchers, state);
-    expect(result).toEqual('');
+    expect(result).toEqual({ metricName: '', definingMatchers: null });
   });
 
   it('should work with multiple label matchers', () => {
@@ -1484,6 +1484,6 @@ describe('findMetricNameInLabelMatchers function', () => {
     const tree = syntaxTree(state);
     const labelMatchers = tree.resolve(1, -1).node;
     const result = findMetricNameInLabelMatchers(labelMatchers, state);
-    expect(result).toEqual('go_goroutines');
+    expect(result).toEqual({ metricName: 'go_goroutines', definingMatchers: null });
   });
 });
