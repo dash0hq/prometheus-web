@@ -15,6 +15,7 @@ import { FetchFn } from './index';
 import { Matcher } from '../types';
 import { labelMatchersToString } from '../parser';
 import { LRUCache } from 'lru-cache';
+import { METRIC_NAME_LABELS } from '../complete/hybrid';
 
 export interface MetricMetadata {
   type: string;
@@ -22,7 +23,7 @@ export interface MetricMetadata {
 }
 
 export interface PrometheusClient {
-  labelNames(metricName?: string): Promise<string[]>;
+  labelNames(metricName?: string, matchers?: Matcher[]): Promise<string[]>;
 
   // labelValues return a list of the value associated to the given labelName.
   // In case a metric is provided, then the list of values is then associated to the couple <MetricName, LabelName>
@@ -108,9 +109,28 @@ export class HTTPPrometheusClient implements PrometheusClient {
     }
   }
 
-  labelNames(metricName?: string): Promise<string[]> {
+  labelNames(metricName?: string, matchers?: Matcher[]): Promise<string[]> {
     const end = new Date();
     const start = new Date(end.getTime() - this.lookbackInterval);
+
+    if ((metricName === undefined || metricName === '') && matchers && matchers.length > 0) {
+      // Use series API with empty metric name but include the matchers
+      return this.series('', matchers).then((series) => {
+        const labelNames = new Set<string>();
+        for (const labelSet of series) {
+          for (const [key] of Object.entries(labelSet)) {
+            if (METRIC_NAME_LABELS.includes(key)) {
+              continue;
+            }
+            labelNames.add(key);
+          }
+        }
+        console.log('LabelNames:');
+        console.log(labelNames);
+        return Array.from(labelNames);
+      });
+    }
+
     if (metricName === undefined || metricName === '') {
       const request = this.buildRequest(
         this.labelsEndpoint(),
@@ -384,7 +404,12 @@ export class CachedPrometheusClient implements PrometheusClient {
     this.cache = new Cache(config);
   }
 
-  labelNames(metricName?: string): Promise<string[]> {
+  labelNames(metricName?: string, matchers?: Matcher[]): Promise<string[]> {
+    // For the case with matchers, we should bypass cache to ensure accuracy
+    if (matchers && matchers.length > 0) {
+      return this.client.labelNames(metricName, matchers);
+    }
+
     const cachedLabel = this.cache.getLabelNames(metricName);
     if (cachedLabel && cachedLabel.length > 0) {
       return Promise.resolve(cachedLabel);
@@ -431,8 +456,8 @@ export class CachedPrometheusClient implements PrometheusClient {
     });
   }
 
-  series(metricName: string): Promise<Map<string, string>[]> {
-    return this.client.series(metricName).then((series) => {
+  series(metricName: string, matchers?: Matcher[]): Promise<Map<string, string>[]> {
+    return this.client.series(metricName, matchers).then((series) => {
       this.cache.setAssociations(metricName, series);
       return series;
     });
