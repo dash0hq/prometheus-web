@@ -22,8 +22,8 @@ import { faSearch, faSpinner, faGlobeEurope, faIndent, faCheck } from '@fortawes
 import MetricsExplorer from './MetricsExplorer';
 import { usePathPrefix } from '../../contexts/PathPrefixContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { CompleteStrategy, PromQLExtension } from '@prometheus-io/codemirror-promql';
-import { newCompleteStrategy } from '@prometheus-io/codemirror-promql/dist/esm/complete';
+import { CompleteStrategy, PromQLExtension } from '@dash0hq/codemirror-promql';
+import { newCompleteStrategy } from '@dash0hq/codemirror-promql/dist/esm/complete';
 import { API_PATH } from '../../constants/constants';
 
 const promqlExtension = new PromQLExtension();

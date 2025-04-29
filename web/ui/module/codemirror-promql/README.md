@@ -11,7 +11,7 @@ and autocompletion for PromQL ([Prometheus Query Language](https://prometheus.io
 This mode is available as a npm package:
 
 ```bash
-npm install --save @prometheus-io/codemirror-promql
+npm install --save @dash0hq/codemirror-promql
 ```
 
 **Note:** You will have to manually install different packages that are part
@@ -47,7 +47,7 @@ If you want to enjoy about the different features provided without taking too mu
 them, then the easiest way is this one:
 
 ```typescript
-import {PromQLExtension} from '@prometheus-io/codemirror-promql';
+import {PromQLExtension} from '@dash0hq/codemirror-promql';
 import {basicSetup} from '@codemirror/basic-setup';
 import {EditorState} from '@codemirror/state';
 import {EditorView} from '@codemirror/view';

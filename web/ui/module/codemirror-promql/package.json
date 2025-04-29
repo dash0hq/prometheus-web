@@ -1,5 +1,5 @@
 {
-  "name": "@prometheus-io/codemirror-promql",
+  "name": "@dash0hq/codemirror-promql",
   "version": "0.302.1",
   "description": "a CodeMirror mode for the PromQL language",
   "types": "dist/esm/index.d.ts",

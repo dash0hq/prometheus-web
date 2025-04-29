@@ -188,7 +188,6 @@ export function findMetricNameInLabelMatchers(labelMatchers: SyntaxNode | null, 
   if (!labelMatchers || labelMatchers.type.id !== LabelMatchers) {
     return { metricName: '', definingMatchers: null };
   }
-
   // Initialize a cursor to iterate through the label matchers inside the `{...}` block.
   let cursor = labelMatchers.cursor();
 
@@ -540,7 +539,6 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
         if (!METRIC_NAME_LABELS.includes(labelName)) {
           const { metricName } = getMetricNameInVectorSelector(node, state);
           _metricName = metricName;
-        }
 
         //Add the autocompletion context for label values
         result.push({
