@@ -539,6 +539,7 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
         if (!METRIC_NAME_LABELS.includes(labelName)) {
           const { metricName } = getMetricNameInVectorSelector(node, state);
           _metricName = metricName;
+        }
 
         //Add the autocompletion context for label values
         result.push({
