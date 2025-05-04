@@ -1301,19 +1301,19 @@ describe('autocomplete promQL test', () => {
         options: [
           {
             label: 'env',
-            type: 'constant',
+            type: 'none',
           },
           {
             label: 'instance',
-            type: 'constant',
+            type: 'none',
           },
           {
             label: 'job',
-            type: 'constant',
+            type: 'none',
           },
           {
             label: 'state',
-            type: 'constant',
+            type: 'none',
           },
         ],
         from: 20,
@@ -1330,7 +1330,7 @@ describe('autocomplete promQL test', () => {
         options: [
           {
             label: 'demo',
-            type: 'text',
+            type: 'none',
           },
         ],
         from: 25,
@@ -1348,15 +1348,15 @@ describe('autocomplete promQL test', () => {
           [
             {
               label: 'metric1',
-              type: 'constant',
+              type: 'none',
             },
             {
               label: 'metric2',
-              type: 'constant',
+              type: 'none',
             },
             {
               label: 'rat',
-              type: 'constant',
+              type: 'none',
             },
           ],
           functionIdentifierTerms,
