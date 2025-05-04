@@ -35,15 +35,15 @@ export const binOpTerms = [
 ];
 
 export const binOpModifierTerms = [
-  { label: 'on', info: 'Match only on specified labels', type: 'keyword' },
-  { label: 'ignoring', info: 'Ignore specified labels for matching', type: 'keyword' },
-  { label: 'group_left', info: 'Allow many-to-one matching', type: 'keyword' },
-  { label: 'group_right', info: 'Allow one-to-many matching', type: 'keyword' },
+  { label: 'on', info: 'Match only on specified labels', type: 'none' },
+  { label: 'ignoring', info: 'Ignore specified labels for matching', type: 'none' },
+  { label: 'group_left', info: 'Allow many-to-one matching', type: 'none' },
+  { label: 'group_right', info: 'Allow one-to-many matching', type: 'none' },
 ];
 
 export const atModifierTerms = [
-  { label: 'start()', info: 'resolve to the start of the query', type: 'keyword' },
-  { label: 'end()', info: 'resolve to the end of the query', type: 'keyword' },
+  { label: 'start()', info: 'resolve to the start of the query', type: 'none' },
+  { label: 'end()', info: 'resolve to the end of the query', type: 'none' },
 ];
 
 export const functionIdentifierTerms = [
@@ -620,8 +620,8 @@ export const aggregateOpModifierTerms = [
 ];
 
 export const numberTerms = [
-  { label: 'nan', info: 'Floating-point NaN value', type: 'constant' },
-  { label: 'inf', info: 'Floating-point infinity', type: 'constant' },
+  { label: 'nan', info: 'Floating-point NaN value', type: 'none' },
+  { label: 'inf', info: 'Floating-point infinity', type: 'none' },
 ];
 
 export const snippets: readonly Completion[] = [

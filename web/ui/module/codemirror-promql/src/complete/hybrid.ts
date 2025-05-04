@@ -750,7 +750,7 @@ export class HybridComplete implements CompleteStrategy {
       .metricNames(context.metricName)
       .then((metricNames: string[]) => {
         for (const metricName of metricNames) {
-          metricCompletion.set(metricName, { label: metricName, type: 'constant' });
+          metricCompletion.set(metricName, { label: metricName, type: 'none' });
         }
 
         // avoid to get all metric metadata if the prometheus server is too big
@@ -814,7 +814,7 @@ export class HybridComplete implements CompleteStrategy {
       return result;
     }
     return this.prometheusClient.labelNames(context.metricName, context.matchers).then((labelNames: string[]) => {
-      return result.concat(labelNames.map((value) => ({ label: value, type: 'constant' })));
+      return result.concat(labelNames.map((value) => ({ label: value, type: 'none' })));
     });
   }
 
@@ -823,7 +823,7 @@ export class HybridComplete implements CompleteStrategy {
       return result;
     }
     return this.prometheusClient.labelValues(context.labelName, context.metricName, context.matchers).then((labelValues: string[]) => {
-      return result.concat(labelValues.map((value) => ({ label: value, type: 'text' })));
+      return result.concat(labelValues.map((value) => ({ label: value, type: 'none' })));
     });
   }
 }
