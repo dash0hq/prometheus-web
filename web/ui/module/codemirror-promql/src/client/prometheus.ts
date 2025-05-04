@@ -117,7 +117,13 @@ export class HTTPPrometheusClient implements PrometheusClient {
       // Use series API with empty metric name but include the matchers
       return this.series('', matchers).then((series) => {
         const labelNames = new Set<string>();
+        console.log("Series:");
+        console.log(series);
+        //Check if result is empty,  
+        if(series.length > 0){
         for (const labelSet of series) {
+          console.log("LabelSet:");
+          console.log(labelSet);
           for (const [key] of Object.entries(labelSet)) {
             if (METRIC_NAME_LABELS.includes(key)) {
               continue;
@@ -125,8 +131,12 @@ export class HTTPPrometheusClient implements PrometheusClient {
             labelNames.add(key);
           }
         }
-        console.log('LabelNames:');
-        console.log(labelNames);
+      }
+      //if result is empty just return everything
+      else{
+      const all_labelNames = this.labelNames('')
+      return all_labelNames
+      }       
         return Array.from(labelNames);
       });
     }
