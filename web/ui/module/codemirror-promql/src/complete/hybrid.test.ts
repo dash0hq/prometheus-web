@@ -26,7 +26,7 @@ import {
   numberTerms,
   snippets,
 } from './promql.terms';
-import { EqlSingle, LabelName, Neq } from '@prometheus-io/lezer-promql';
+import { EqlSingle, Neq } from '@prometheus-io/lezer-promql';
 import { syntaxTree } from '@codemirror/language';
 import { newCompleteStrategy } from './index';
 import { getMetricNameInVectorSelector } from './hybrid';
@@ -1394,9 +1394,7 @@ describe('getMetricNameInVectorSelector and findMetricNameInLabelMatchers tests'
       title: 'should get metric name from __name__ label matcher',
       expr: '{__name__="http_requests_total", code="200"}',
       pos: 20, // position inside the label matcher section
-
       expectedMetricName: { metricName: 'http_requests_total', definingMatchers: null },
-
     },
     {
       title: 'should get metric name from otel_metric_name label matcher',

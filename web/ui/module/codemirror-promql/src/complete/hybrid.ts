@@ -81,7 +81,7 @@ import { syntaxTree } from '@codemirror/language';
 
 // Default list of label names that define a metric name in PromQL matchers.
 // This can be customized to support additional metric-defining labels.
-export const METRIC_NAME_LABELS: string[] = ['__name__', 'otel_metric_name'];
+export const METRIC_NAME_LABELS: readonly string[] = ['__name__', 'otel_metric_name'];
 
 export interface MetricNameResult {
   metricName: string;
@@ -535,16 +535,16 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
         }
 
         //Set the metric name, handling the special case for __name__
-        let _metricName = '';
+        let resolvedMetricName = '';
         if (!METRIC_NAME_LABELS.includes(labelName)) {
           const { metricName } = getMetricNameInVectorSelector(node, state);
-          _metricName = metricName;
+          resolvedMetricName = metricName;
         }
 
         //Add the autocompletion context for label values
         result.push({
           kind: ContextKind.LabelValue,
-          metricName: _metricName,
+          metricName: resolvedMetricName,
           labelName: labelName,
           matchers: labelMatchers,
         });
