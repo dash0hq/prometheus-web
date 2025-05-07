@@ -81,7 +81,12 @@ import { syntaxTree } from '@codemirror/language';
 
 // Default list of label names that define a metric name in PromQL matchers.
 // This can be customized to support additional metric-defining labels.
-const METRIC_NAME_LABELS: string[] = ['__name__', 'otel_metric_name'];
+export const METRIC_NAME_LABELS: readonly string[] = ['__name__', 'otel_metric_name'];
+
+export interface MetricNameResult {
+  metricName: string;
+  definingMatchers: Matcher | null;
+}
 
 const autocompleteNodes: { [key: string]: Completion[] } = {
   matchOp: matchOpTerms,
@@ -122,38 +127,38 @@ export interface Context {
   matchers?: Matcher[];
 }
 
-function getMetricNameInGroupBy(tree: SyntaxNode, state: EditorState): string {
+function getMetricNameInGroupBy(tree: SyntaxNode, state: EditorState): MetricNameResult {
   // There should be an AggregateExpr as parent of the GroupingLabels.
   // Then we should find the VectorSelector child to be able to find the metric name.
   const currentNode: SyntaxNode | null = walkBackward(tree, AggregateExpr);
   if (!currentNode) {
-    return '';
+    return { metricName: '', definingMatchers: null };
   }
-  let metricName = '';
+  let metricResult: MetricNameResult = { metricName: '', definingMatchers: null };
   currentNode.cursor().iterate((node) => {
     // Continue until we find the VectorSelector, then look up the metric name.
     if (node.type.id === VectorSelector) {
-      metricName = getMetricNameInVectorSelector(node.node, state);
-      if (metricName) {
+      metricResult = getMetricNameInVectorSelector(node.node, state);
+      if (metricResult.metricName) {
         return false;
       }
     }
   });
-  return metricName;
+  return metricResult;
 }
 
-export function getMetricNameInVectorSelector(tree: SyntaxNode, state: EditorState): string {
+export function getMetricNameInVectorSelector(tree: SyntaxNode, state: EditorState): MetricNameResult {
   // Find if there is a defined metric name. Should be used to autocomplete a labelValue or a labelName
   // First find the parent "VectorSelector" to be able to find then the subChild "Identifier" if it exists.
   let currentNode: SyntaxNode | null = walkBackward(tree, VectorSelector);
   if (!currentNode) {
     // Weird case that shouldn't happen, because "VectorSelector" is by definition the parent of the LabelMatchers.
-    return '';
+    return { metricName: '', definingMatchers: null };
   }
 
   const identifier = currentNode.getChild(Identifier);
   if (identifier) {
-    return state.sliceDoc(identifier.from, identifier.to);
+    return { metricName: state.sliceDoc(identifier.from, identifier.to), definingMatchers: null };
   }
 
   const labelMatchers = currentNode.getChild(LabelMatchers);
@@ -161,7 +166,7 @@ export function getMetricNameInVectorSelector(tree: SyntaxNode, state: EditorSta
     return findMetricNameInLabelMatchers(labelMatchers, state);
   }
 
-  return '';
+  return { metricName: '', definingMatchers: null };
 }
 
 /**
@@ -177,13 +182,12 @@ export function getMetricNameInVectorSelector(tree: SyntaxNode, state: EditorSta
  *
  * Useful when autocompleting or analyzing metric selectors in PromQL syntax trees.
  */
-export function findMetricNameInLabelMatchers(labelMatchers: SyntaxNode | null, state: EditorState): string {
+export function findMetricNameInLabelMatchers(labelMatchers: SyntaxNode | null, state: EditorState): MetricNameResult {
   // Validate that we are working with a LabelMatchers node.
   // If not, return early with no result.
   if (!labelMatchers || labelMatchers.type.id !== LabelMatchers) {
-    return '';
+    return { metricName: '', definingMatchers: null };
   }
-
   // Initialize a cursor to iterate through the label matchers inside the `{...}` block.
   let cursor = labelMatchers.cursor();
 
@@ -205,17 +209,21 @@ export function findMetricNameInLabelMatchers(labelMatchers: SyntaxNode | null, 
         if (METRIC_NAME_LABELS.includes(labelName)) {
           // Extract the raw value string, which is quoted.
           const raw = state.sliceDoc(valueNode.from, valueNode.to);
-
           // Remove surrounding quotes from the string literal to get the plain metric name.
           const metricName = raw.replace(/^"(.*)"$/, '$1');
-          return metricName;
+
+          if (labelName !== '__name__') {
+            const definingMatcher = new Matcher(EqlSingle, labelName, metricName);
+            return { metricName: '', definingMatchers: definingMatcher };
+          }
+          return { metricName: metricName, definingMatchers: null };
         }
       }
       // Move to the next sibling matcher inside the `{...}` block.
     } while (cursor.nextSibling());
   }
   // If no matching label matcher is found, return an empty string.
-  return '';
+  return { metricName: '', definingMatchers: null };
 }
 
 function arrayToCompletionResult(data: Completion[], from: number, to: number, includeSnippet = false, span = true): CompletionResult {
@@ -363,8 +371,8 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
           //   Identifier,
           //   ⚠(Identifier)
           // )
-          const operator = getMetricNameInVectorSelector(node, state);
-          if (aggregateOpTerms.filter((term) => term.label === operator).length > 0) {
+          const { metricName } = getMetricNameInVectorSelector(node, state);
+          if (aggregateOpTerms.filter((term) => term.label === metricName).length > 0) {
             result.push({ kind: ContextKind.AggregateOpModifier });
           }
           // It's possible it also match the expr 'metric_name unle'.
@@ -463,13 +471,15 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
       // In this case we are in the given situation:
       //      sum by () or sum (metric_name) by ()
       // so we have or to autocomplete any kind of labelName or to autocomplete only the labelName associated to the metric
-      result.push({ kind: ContextKind.LabelName, metricName: getMetricNameInGroupBy(node, state) });
+      const { metricName: groupByMetricName, definingMatchers: groupByMatchers } = getMetricNameInGroupBy(node, state);
+      result.push({ kind: ContextKind.LabelName, metricName: groupByMetricName, matchers: groupByMatchers ? [groupByMatchers] : undefined });
       break;
     case LabelMatchers:
       // In that case we are in the given situation:
       //       metric_name{} or {}
       // so we have or to autocomplete any kind of labelName or to autocomplete only the labelName associated to the metric
-      result.push({ kind: ContextKind.LabelName, metricName: getMetricNameInVectorSelector(node, state) });
+      const { metricName, definingMatchers } = getMetricNameInVectorSelector(node, state);
+      result.push({ kind: ContextKind.LabelName, metricName: metricName, matchers: definingMatchers ? [definingMatchers] : undefined });
       break;
     case LabelName:
       if (node.parent?.type.id === GroupingLabels) {
@@ -482,7 +492,12 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
         //       metric_name{myL} or {myL}
         // so we have or to continue to autocomplete any kind of labelName or
         // to continue to autocomplete only the labelName associated to the metric
-        result.push({ kind: ContextKind.LabelName, metricName: getMetricNameInVectorSelector(node, state) });
+        const { metricName, definingMatchers } = getMetricNameInVectorSelector(node, state);
+        result.push({
+          kind: ContextKind.LabelName,
+          metricName: metricName,
+          matchers: definingMatchers ? [definingMatchers] : undefined,
+        });
       }
       break;
     case StringLiteral:
@@ -520,15 +535,16 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
         }
 
         //Set the metric name, handling the special case for __name__
-        let metricName = '';
+        let resolvedMetricName = '';
         if (!METRIC_NAME_LABELS.includes(labelName)) {
-          metricName = getMetricNameInVectorSelector(node, state);
+          const { metricName } = getMetricNameInVectorSelector(node, state);
+          resolvedMetricName = metricName;
         }
 
         //Add the autocompletion context for label values
         result.push({
           kind: ContextKind.LabelValue,
-          metricName: metricName,
+          metricName: resolvedMetricName,
           labelName: labelName,
           matchers: labelMatchers,
         });
@@ -734,7 +750,7 @@ export class HybridComplete implements CompleteStrategy {
       .metricNames(context.metricName)
       .then((metricNames: string[]) => {
         for (const metricName of metricNames) {
-          metricCompletion.set(metricName, { label: metricName, type: 'constant' });
+          metricCompletion.set(metricName, { label: metricName, type: 'none' });
         }
 
         // avoid to get all metric metadata if the prometheus server is too big
@@ -797,8 +813,8 @@ export class HybridComplete implements CompleteStrategy {
     if (!this.prometheusClient) {
       return result;
     }
-    return this.prometheusClient.labelNames(context.metricName).then((labelNames: string[]) => {
-      return result.concat(labelNames.map((value) => ({ label: value, type: 'constant' })));
+    return this.prometheusClient.labelNames(context.metricName, context.matchers).then((labelNames: string[]) => {
+      return result.concat(labelNames.map((value) => ({ label: value, type: 'none' })));
     });
   }
 
@@ -807,7 +823,7 @@ export class HybridComplete implements CompleteStrategy {
       return result;
     }
     return this.prometheusClient.labelValues(context.labelName, context.metricName, context.matchers).then((labelValues: string[]) => {
-      return result.concat(labelValues.map((value) => ({ label: value, type: 'text' })));
+      return result.concat(labelValues.map((value) => ({ label: value, type: 'none' })));
     });
   }
 }
