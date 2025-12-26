@@ -1,6 +1,6 @@
 {
   "name": "@dash0hq/codemirror-promql",
-  "version": "0.302.1-dash01",
+  "version": "0.302.1-dash02",
   "description": "a CodeMirror mode for the PromQL language",
   "types": "dist/esm/index.d.ts",
   "module": "dist/esm/index.js",
