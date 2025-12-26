@@ -826,4 +826,12 @@ export class HybridComplete implements CompleteStrategy {
       return result.concat(labelValues.map((value) => ({ label: value, type: 'none' })));
     });
   }
+
+  destroy(): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof (this.prometheusClient as any)?.destroy === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.prometheusClient as any).destroy();
+    }
+  }
 }

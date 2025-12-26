@@ -95,4 +95,8 @@ export class PromQLExtension {
     }
     return extension;
   }
+
+  destroy(): void {
+    this.complete?.destroy?.();
+  }
 }

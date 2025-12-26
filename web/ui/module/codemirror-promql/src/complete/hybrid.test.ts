@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { analyzeCompletion, computeStartCompletePosition, ContextKind } from './hybrid';
+import { jest } from '@jest/globals';
+import { analyzeCompletion, computeStartCompletePosition, ContextKind, HybridComplete } from './hybrid';
 import { createEditorState, mockedMetricsTerms, mockPrometheusServer } from '../test/utils-test';
 import { Completion, CompletionContext } from '@codemirror/autocomplete';
 import {
@@ -1485,5 +1486,57 @@ describe('findMetricNameInLabelMatchers function', () => {
     const labelMatchers = tree.resolve(1, -1).node;
     const result = findMetricNameInLabelMatchers(labelMatchers, state);
     expect(result).toEqual({ metricName: 'go_goroutines', definingMatchers: null });
+  });
+});
+
+describe('HybridComplete destroy', () => {
+  it('should call destroy on prometheusClient if available', () => {
+    const mockDestroy = jest.fn();
+    const mockClient = {
+      labelNames: () => Promise.resolve([]),
+      labelValues: () => Promise.resolve([]),
+      metricMetadata: () => Promise.resolve({}),
+      series: () => Promise.resolve([]),
+      metricNames: () => Promise.resolve([]),
+      flags: () => Promise.resolve({}),
+      destroy: mockDestroy,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const complete = new HybridComplete(mockClient as any);
+    complete.destroy();
+
+    expect(mockDestroy).toHaveBeenCalled();
+  });
+
+  it('should not throw if prometheusClient has no destroy method', () => {
+    const mockClient = {
+      labelNames: () => Promise.resolve([]),
+      labelValues: () => Promise.resolve([]),
+      metricMetadata: () => Promise.resolve({}),
+      series: () => Promise.resolve([]),
+      metricNames: () => Promise.resolve([]),
+      flags: () => Promise.resolve({}),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const complete = new HybridComplete(mockClient as any);
+
+    expect(() => complete.destroy()).not.toThrow();
+  });
+
+  it('should not throw if prometheusClient is undefined', () => {
+    const complete = new HybridComplete();
+
+    expect(() => complete.destroy()).not.toThrow();
+  });
+
+  it('should be safe to call destroy multiple times', () => {
+    const complete = new HybridComplete();
+
+    expect(() => {
+      complete.destroy();
+      complete.destroy();
+    }).not.toThrow();
   });
 });

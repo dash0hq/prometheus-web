@@ -88,6 +88,7 @@ export class HTTPPrometheusClient implements PrometheusClient {
   // when calling it, thus the indirection via another function wrapper.
   private readonly fetchFn: FetchFn = (input: RequestInfo, init?: RequestInit): Promise<Response> => fetch(input, init);
   private requestHeaders: Headers = new Headers();
+  private readonly abortControllers: Set<AbortController> = new Set();
 
   constructor(config: PrometheusConfig) {
     this.url = config.url ? config.url : '';
@@ -252,10 +253,14 @@ export class HTTPPrometheusClient implements PrometheusClient {
   }
 
   private fetchAPI<T>(resource: string, init?: RequestInit): Promise<T> {
+    const controller = new AbortController();
+    this.abortControllers.add(controller);
+
     if (init) {
       init.headers = this.requestHeaders;
+      init.signal = controller.signal;
     } else {
-      init = { headers: this.requestHeaders };
+      init = { headers: this.requestHeaders, signal: controller.signal };
     }
     return this.fetchFn(this.url + resource, init)
       .then((res) => {
@@ -273,6 +278,9 @@ export class HTTPPrometheusClient implements PrometheusClient {
           throw new Error('missing "data" field in response JSON');
         }
         return apiRes.data;
+      })
+      .finally(() => {
+        this.abortControllers.delete(controller);
       });
   }
 
@@ -304,6 +312,13 @@ export class HTTPPrometheusClient implements PrometheusClient {
 
   private flagsEndpoint(): string {
     return `${this.apiPrefix}/status/flags`;
+  }
+
+  destroy(): void {
+    for (const controller of this.abortControllers) {
+      controller.abort();
+    }
+    this.abortControllers.clear();
   }
 }
 
@@ -398,6 +413,14 @@ class Cache {
     }
     return [];
   }
+
+  destroy(): void {
+    this.completeAssociation.clear();
+    this.labelValues.clear();
+    this.metricMetadata = {};
+    this.labelNames = [];
+    this.flags = {};
+  }
 }
 
 export class CachedPrometheusClient implements PrometheusClient {
@@ -482,5 +505,14 @@ export class CachedPrometheusClient implements PrometheusClient {
       this.cache.setFlags(flags);
       return flags;
     });
+  }
+
+  destroy(): void {
+    this.cache.destroy();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof (this.client as any).destroy === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.client as any).destroy();
+    }
   }
 }
