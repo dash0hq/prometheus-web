@@ -21,6 +21,9 @@ import {
     Count,
     CountValues,
     End,
+    Fill,
+    FillLeft,
+    FillRight,
     Group,
     GroupLeft,
     GroupRight,
@@ -82,6 +85,9 @@ const contextualKeywordTokens = {
     unless: Unless,
     start: Start,
     end: End,
+    fill: Fill,
+    fill_left: FillLeft,
+    fill_right: FillRight,
 };
 
 export const extendIdentifier = (value, stack) => {

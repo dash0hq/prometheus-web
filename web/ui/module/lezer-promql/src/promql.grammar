@@ -91,11 +91,30 @@ MatchingModifierClause {
   ((GroupLeft | GroupRight) (!group GroupingLabels)?)?
 }
 
+FillClause {
+  Fill "(" NumberDurationLiteral ")"
+}
+
+FillLeftClause {
+  FillLeft "(" NumberDurationLiteral ")"
+}
+
+FillRightClause {
+  FillRight "(" NumberDurationLiteral ")"
+}
+
+FillModifier {
+  (FillClause | FillLeftClause | FillRightClause) |
+  (FillLeftClause FillRightClause) |
+  (FillRightClause FillLeftClause)
+}
+
 BoolModifier { Bool }
 
 binModifiers {
   BoolModifier?
   MatchingModifierClause?
+  FillModifier?
 }
 
 GroupingLabels {
@@ -349,7 +368,10 @@ NumberDurationLiteralInDurationContext {
   Or,
   Unless,
   Start,
-  End
+  End,
+  Fill,
+  FillLeft,
+  FillRight
 }
 
 @external propSource promQLHighLight from "./highlight"

@@ -14,13 +14,13 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import { PromQLExtension } from './promql';
 import { CompleteStrategy } from './complete';
-import { CompletionContext, CompletionResult } from '@codemirror/autocomplete';
+import { CompletionResult } from '@codemirror/autocomplete';
 
 describe('PromQLExtension destroy', () => {
   it('should call destroy on complete strategy if available', () => {
     const mockDestroy = jest.fn();
     const mockStrategy: CompleteStrategy = {
-      promQL: (_context: CompletionContext): CompletionResult | null => null,
+      promQL: (): CompletionResult | null => null,
       destroy: mockDestroy,
     };
 
@@ -33,7 +33,7 @@ describe('PromQLExtension destroy', () => {
 
   it('should not throw if complete strategy has no destroy method', () => {
     const mockStrategy: CompleteStrategy = {
-      promQL: (_context: CompletionContext): CompletionResult | null => null,
+      promQL: (): CompletionResult | null => null,
     };
 
     const extension = new PromQLExtension();
