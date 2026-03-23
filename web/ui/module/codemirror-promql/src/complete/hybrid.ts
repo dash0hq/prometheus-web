@@ -150,7 +150,7 @@ function getMetricNameInGroupBy(tree: SyntaxNode, state: EditorState): MetricNam
 export function getMetricNameInVectorSelector(tree: SyntaxNode, state: EditorState): MetricNameResult {
   // Find if there is a defined metric name. Should be used to autocomplete a labelValue or a labelName
   // First find the parent "VectorSelector" to be able to find then the subChild "Identifier" if it exists.
-  let currentNode: SyntaxNode | null = walkBackward(tree, VectorSelector);
+  const currentNode: SyntaxNode | null = walkBackward(tree, VectorSelector);
   if (!currentNode) {
     // Weird case that shouldn't happen, because "VectorSelector" is by definition the parent of the LabelMatchers.
     return { metricName: '', definingMatchers: null };
@@ -189,7 +189,7 @@ export function findMetricNameInLabelMatchers(labelMatchers: SyntaxNode | null, 
     return { metricName: '', definingMatchers: null };
   }
   // Initialize a cursor to iterate through the label matchers inside the `{...}` block.
-  let cursor = labelMatchers.cursor();
+  const cursor = labelMatchers.cursor();
 
   // Move the cursor to the first child (first individual matcher) if it exists.
   if (cursor.firstChild()) {
@@ -467,20 +467,22 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
         );
       }
       break;
-    case GroupingLabels:
+    case GroupingLabels: {
       // In this case we are in the given situation:
       //      sum by () or sum (metric_name) by ()
       // so we have or to autocomplete any kind of labelName or to autocomplete only the labelName associated to the metric
       const { metricName: groupByMetricName, definingMatchers: groupByMatchers } = getMetricNameInGroupBy(node, state);
       result.push({ kind: ContextKind.LabelName, metricName: groupByMetricName, matchers: groupByMatchers ? [groupByMatchers] : undefined });
       break;
-    case LabelMatchers:
+    }
+    case LabelMatchers: {
       // In that case we are in the given situation:
       //       metric_name{} or {}
       // so we have or to autocomplete any kind of labelName or to autocomplete only the labelName associated to the metric
       const { metricName, definingMatchers } = getMetricNameInVectorSelector(node, state);
       result.push({ kind: ContextKind.LabelName, metricName: metricName, matchers: definingMatchers ? [definingMatchers] : undefined });
       break;
+    }
     case LabelName:
       if (node.parent?.type.id === GroupingLabels) {
         // In this case we are in the given situation:

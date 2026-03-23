@@ -39,6 +39,9 @@ export const binOpModifierTerms = [
   { label: 'ignoring', info: 'Ignore specified labels for matching', type: 'none' },
   { label: 'group_left', info: 'Allow many-to-one matching', type: 'none' },
   { label: 'group_right', info: 'Allow one-to-many matching', type: 'none' },
+  { label: 'fill', info: 'Fill in missing series on both sides', type: 'none' },
+  { label: 'fill_left', info: 'Fill in missing series on the left side', type: 'none' },
+  { label: 'fill_right', info: 'Fill in missing series on the right side', type: 'none' },
 ];
 
 export const atModifierTerms = [

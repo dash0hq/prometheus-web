@@ -207,9 +207,11 @@ jobs:
           args: --verbose
           # Make sure to sync this with Makefile.common and scripts/golangci-lint.yml.
           version: v2.0.2
-  fuzzing:
-    uses: ./.github/workflows/fuzzing.yml
-    if: github.event_name == 'pull_request'
+  # Disabled: OSS-Fuzz is configured for upstream prometheus/prometheus and
+  # does not work in the dash0hq fork (cannot detect repo/commit).
+  # fuzzing:
+  #   uses: ./.github/workflows/fuzzing.yml
+  #   if: github.event_name == 'pull_request'
   codeql:
     uses: ./.github/workflows/codeql-analysis.yml
 

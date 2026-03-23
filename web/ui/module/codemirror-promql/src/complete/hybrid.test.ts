@@ -1401,7 +1401,7 @@ describe('getMetricNameInVectorSelector and findMetricNameInLabelMatchers tests'
       title: 'should get metric name from otel_metric_name label matcher',
       expr: '{otel_metric_name="http.server.request.duration", instance="localhost:9090"}',
       pos: 30, // position inside the label matcher section
-      expectedMetricName: { metricName: '', definingMatchers: { type: 146, name: 'otel_metric_name', value: 'http.server.request.duration' } },
+      expectedMetricName: { metricName: '', definingMatchers: { type: 153, name: 'otel_metric_name', value: 'http.server.request.duration' } },
     },
     {
       title: 'should return empty string when no metric name can be found',
@@ -1469,7 +1469,7 @@ describe('findMetricNameInLabelMatchers function', () => {
     const tree = syntaxTree(state);
     const labelMatchers = tree.resolve(1, -1).node;
     const result = findMetricNameInLabelMatchers(labelMatchers, state);
-    expect(result).toEqual({ metricName: '', definingMatchers: { type: 146, name: 'otel_metric_name', value: 'dash0.test' } });
+    expect(result).toEqual({ metricName: '', definingMatchers: { type: 153, name: 'otel_metric_name', value: 'dash0.test' } });
   });
 
   it('should only consider exact match operators (=)', () => {
