@@ -26,7 +26,7 @@ assetsDir="./static"
 function buildModule() {
   for module in "${buildOrder[@]}"; do
     echo "build ${module}"
-    if [ "${module}" = "codemirror-promql" ]; then
+    if [ "${module}" = "codemirror-promql" ] || [ "${module}" = "lezer-promql" ]; then
       npm run build -w "@dash0hq/${module}"
     else
       npm run build -w "@prometheus-io/${module}"
