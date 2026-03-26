@@ -1,0 +1,49 @@
+---
+name: Publish UI packages to GitHub Packages
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish @dash0hq/codemirror-promql and @prometheus-io/lezer-promql
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version-file: "web/ui/.nvmrc"
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Cache npm
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        working-directory: web/ui
+        run: npm ci
+
+      - name: Build modules
+        working-directory: web/ui
+        run: npm run build:module
+
+      - name: Copy license and changelog
+        run: ./scripts/ui_release.sh --copy
+
+      - name: Publish packages
+        run: ./scripts/ui_release.sh --publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

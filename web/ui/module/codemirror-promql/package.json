@@ -12,6 +12,9 @@
     "lint": "eslint src/ --ext .ts",
     "lint:fix": "eslint --fix src/ --ext .ts"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/prometheus/prometheus.git"
@@ -29,7 +32,7 @@
   },
   "homepage": "https://github.com/prometheus/prometheus/blob/main/web/ui/module/codemirror-promql/README.md",
   "dependencies": {
-    "@prometheus-io/lezer-promql": "0.302.1",
+    "@prometheus-io/lezer-promql": "0.302.1-dash03",
     "lru-cache": "^11.0.2"
   },
   "devDependencies": {
