@@ -1,5 +1,5 @@
 {
-  "name": "@prometheus-io/lezer-promql",
+  "name": "@dash0hq/lezer-promql",
   "version": "0.302.1-dash03",
   "description": "lezer-based PromQL grammar",
   "main": "dist/index.cjs",
