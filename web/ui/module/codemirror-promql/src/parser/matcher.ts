@@ -23,7 +23,7 @@ import {
   UnquotedLabelMatcher,
   QuotedLabelMatcher,
   QuotedLabelName,
-} from '@prometheus-io/lezer-promql';
+} from '@dash0hq/lezer-promql';
 import { EditorState } from '@codemirror/state';
 import { Matcher } from '../types';
 

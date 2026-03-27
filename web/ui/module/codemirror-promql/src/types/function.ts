@@ -89,7 +89,7 @@ import {
   Timestamp,
   Vector,
   Year,
-} from '@prometheus-io/lezer-promql';
+} from '@dash0hq/lezer-promql';
 
 export enum ValueType {
   none = 'none',

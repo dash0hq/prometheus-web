@@ -29,7 +29,7 @@ import {
   FillClause,
   FillLeftClause,
   FillRightClause,
-} from '@prometheus-io/lezer-promql';
+} from '@dash0hq/lezer-promql';
 import { VectorMatchCardinality, VectorMatching } from '../types';
 import { containsAtLeastOneChild } from './path-finder';
 

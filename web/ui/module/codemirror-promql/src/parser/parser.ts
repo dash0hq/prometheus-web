@@ -46,7 +46,7 @@ import {
   Unless,
   UnquotedLabelMatcher,
   VectorSelector,
-} from '@prometheus-io/lezer-promql';
+} from '@dash0hq/lezer-promql';
 import { containsAtLeastOneChild } from './path-finder';
 import { getType } from './type';
 import { buildLabelMatchers } from './matcher';

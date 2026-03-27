@@ -27,7 +27,7 @@ import {
   Neq,
   Sub,
   VectorSelector,
-} from '@prometheus-io/lezer-promql';
+} from '@dash0hq/lezer-promql';
 import { createEditorState } from '../test/utils-test';
 import { containsAtLeastOneChild, containsChild, walkBackward } from './path-finder';
 import { SyntaxNode } from '@lezer/common';
