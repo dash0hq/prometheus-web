@@ -60,7 +60,7 @@ import {
   LimitK,
   LimitRatio,
   CountValues,
-} from '@prometheus-io/lezer-promql';
+} from '@dash0hq/lezer-promql';
 import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { EditorState } from '@codemirror/state';
 import { buildLabelMatchers, containsAtLeastOneChild, containsChild, walkBackward } from '../parser';

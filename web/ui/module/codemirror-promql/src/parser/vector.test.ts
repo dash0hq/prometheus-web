@@ -13,7 +13,7 @@
 
 import { buildVectorMatching } from './vector';
 import { createEditorState } from '../test/utils-test';
-import { BinaryExpr } from '@prometheus-io/lezer-promql';
+import { BinaryExpr } from '@dash0hq/lezer-promql';
 import { syntaxTree } from '@codemirror/language';
 import { VectorMatchCardinality, VectorMatching } from '../types';
 

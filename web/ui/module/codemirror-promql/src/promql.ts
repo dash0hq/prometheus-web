@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parser } from '@prometheus-io/lezer-promql';
+import { parser } from '@dash0hq/lezer-promql';
 import { Extension } from '@codemirror/state';
 import { CompleteConfiguration, CompleteStrategy, newCompleteStrategy } from './complete';
 import { LintStrategy, newLintStrategy, promQLLinter } from './lint';

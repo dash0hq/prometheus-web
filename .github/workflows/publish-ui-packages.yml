@@ -9,7 +9,7 @@ on:
 
 jobs:
   publish:
-    name: Publish @dash0hq/codemirror-promql and @prometheus-io/lezer-promql
+    name: Publish @dash0hq/codemirror-promql and @dash0hq/lezer-promql
     runs-on: ubuntu-latest
     permissions:
       contents: read
